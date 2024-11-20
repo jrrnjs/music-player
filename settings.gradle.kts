@@ -22,3 +22,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "musicplayer"
 include(":app")
+include(":designsystem")
