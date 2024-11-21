@@ -26,6 +26,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.yongjin.musicplayer.designsystem.EmptyUI
 import com.yongjin.musicplayer.designsystem.theme.MusicPlayerTheme
+import com.yongjin.musicplayer.feature.dummyAlbums
 import com.yongjin.musicplayer.model.Album
 import kotlinx.collections.immutable.ImmutableList
 
@@ -92,7 +93,7 @@ private fun AlbumListPreview() {
     MusicPlayerTheme {
         Surface {
             AlbumList(
-                albums = dummies
+                albums = dummyAlbums
             )
         }
     }

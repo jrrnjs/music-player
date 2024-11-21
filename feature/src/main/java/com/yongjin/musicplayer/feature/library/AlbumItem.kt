@@ -2,7 +2,6 @@ package com.yongjin.musicplayer.feature.library
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.content.res.Configuration.UI_MODE_TYPE_NORMAL
-import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
@@ -21,9 +20,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.yongjin.musicplayer.designsystem.theme.MusicPlayerTheme
+import com.yongjin.musicplayer.feature.dummyAlbums
 import com.yongjin.musicplayer.model.Album
-import kotlinx.collections.immutable.persistentListOf
-import kotlin.random.Random
 
 @Composable
 fun AlbumItem(album: Album) {
@@ -77,67 +75,8 @@ private fun AlbumPreview() {
     MusicPlayerTheme {
         Surface {
             AlbumItem(
-                album = dummies.random()
+                album = dummyAlbums.random()
             )
         }
     }
 }
-
-internal val dummies = persistentListOf(
-    Album(
-        id = Random.nextLong(),
-        title = "1000 Forms of Fear",
-        artist = "Sia",
-        thumbnailUri = Uri.EMPTY,
-        contentUri = Uri.EMPTY
-    ),
-    Album(
-        id = Random.nextLong(),
-        title = "30",
-        artist = "Adele",
-        thumbnailUri = Uri.EMPTY,
-        contentUri = Uri.EMPTY
-    ),
-    Album(
-        id = Random.nextLong(),
-        title = "After Hours",
-        artist = "The Weeknd",
-        thumbnailUri = Uri.EMPTY,
-        contentUri = Uri.EMPTY
-    ),
-    Album(
-        id = Random.nextLong(),
-        title = "Starboy (Explicit Ver.)",
-        artist = "The Weeknd",
-        thumbnailUri = Uri.EMPTY,
-        contentUri = Uri.EMPTY
-    ),
-    Album(
-        id = Random.nextLong(),
-        title = "Unstoppable",
-        artist = "Sia",
-        thumbnailUri = Uri.EMPTY,
-        contentUri = Uri.EMPTY
-    ),
-    Album(
-        id = Random.nextLong(),
-        title = "CHROMAKOPIA",
-        artist = "Tyler, The Creator",
-        thumbnailUri = Uri.EMPTY,
-        contentUri = Uri.EMPTY
-    ),
-    Album(
-        id = Random.nextLong(),
-        title = "The Star Chapter:Sanctuary (EP)",
-        artist = "TOMORROW X TOGETHER",
-        thumbnailUri = Uri.EMPTY,
-        contentUri = Uri.EMPTY
-    ),
-    Album(
-        id = Random.nextLong(),
-        title = "Hit Me Hard And Soft",
-        artist = "Billie Eilish",
-        thumbnailUri = Uri.EMPTY,
-        contentUri = Uri.EMPTY
-    )
-)
