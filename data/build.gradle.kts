@@ -6,3 +6,7 @@ plugins {
 android {
     namespace = "com.yongjin.musicplayer.data"
 }
+
+dependencies {
+    implementation(project(":model"))
+}
