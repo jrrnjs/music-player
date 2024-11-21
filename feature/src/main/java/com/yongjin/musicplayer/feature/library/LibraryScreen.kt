@@ -24,6 +24,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.yongjin.musicplayer.designsystem.EmptyUI
 import com.yongjin.musicplayer.designsystem.theme.MusicPlayerTheme
 import com.yongjin.musicplayer.model.Album
 import kotlinx.collections.immutable.ImmutableList
@@ -53,9 +54,11 @@ fun LibraryScreen(
                     CircularProgressIndicator()
                 }
 
-                is LibraryState.Failure -> {
-
-                }
+                is LibraryState.Failure -> EmptyUI(
+                    message = (state as LibraryState.Failure).message,
+                    button = "재시도",
+                    onClick = viewModel::getAlbums
+                )
             }
         }
     }
