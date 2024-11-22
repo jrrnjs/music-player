@@ -60,7 +60,7 @@ class MediaDataSource @Inject constructor(
         return@withContext albums
     }
 
-    suspend fun getSongsByAlbum(albumId: Long) = withContext(Dispatchers.IO) {
+    suspend fun getSongsByAlbum(albumId: Long): List<Song> = withContext(Dispatchers.IO) {
         val songs = mutableListOf<Song>()
 
         val uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
