@@ -15,6 +15,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.yongjin.musicplayer.designsystem.theme.MusicPlayerTheme
 import com.yongjin.musicplayer.feature.dummyAlbums
 import com.yongjin.musicplayer.feature.dummySongs
@@ -23,10 +24,13 @@ import com.yongjin.musicplayer.model.Song
 import kotlinx.collections.immutable.ImmutableList
 
 @Composable
-fun AlbumScreen() {
+fun AlbumScreen(
+    navigateUp: () -> Unit,
+) {
     AlbumScreen(
         album = dummyAlbums.random(),
-        songs = dummySongs
+        songs = dummySongs,
+        onNavigationClick = navigateUp
     )
 }
 
@@ -35,13 +39,14 @@ fun AlbumScreen() {
 private fun AlbumScreen(
     album: Album,
     songs: ImmutableList<Song>,
+    onNavigationClick: () -> Unit,
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text(album.title ?: "") },
                 navigationIcon = {
-                    IconButton(onClick = {}) {
+                    IconButton(onClick = onNavigationClick) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Default.ArrowBack,
                             contentDescription = "back"
@@ -76,7 +81,8 @@ private fun AlbumScreenPreview() {
     MusicPlayerTheme {
         AlbumScreen(
             album = dummyAlbums.random(),
-            songs = dummySongs
+            songs = dummySongs,
+            onNavigationClick = {}
         )
     }
 }

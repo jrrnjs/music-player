@@ -19,6 +19,7 @@ dependencies {
     implementation(project(":designsystem"))
     implementation(project(":feature"))
     implementation(project(":data"))
+    implementation(project(":model"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -36,4 +37,5 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.accompanist.permissions)
+    implementation(libs.androidx.navigation.compose)
 }

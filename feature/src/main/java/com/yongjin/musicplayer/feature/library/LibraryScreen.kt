@@ -33,6 +33,7 @@ import kotlinx.collections.immutable.ImmutableList
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LibraryScreen(
+    navigateAlbum: (Album) -> Unit,
     viewModel: LibraryViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -48,7 +49,8 @@ fun LibraryScreen(
         ) {
             when (state) {
                 is LibraryState.Success -> AlbumList(
-                    albums = (state as LibraryState.Success).albums
+                    albums = (state as LibraryState.Success).albums,
+                    onClickItem = navigateAlbum
                 )
 
                 is LibraryState.Loading -> Box(contentAlignment = Alignment.Center) {
@@ -68,6 +70,7 @@ fun LibraryScreen(
 @Composable
 private fun AlbumList(
     albums: ImmutableList<Album>,
+    onClickItem: (Album) -> Unit,
 ) {
     LazyVerticalGrid(
         modifier = Modifier.fillMaxSize(),
@@ -80,7 +83,10 @@ private fun AlbumList(
             items = albums,
             key = { it.id }
         ) { album ->
-            AlbumItem(album)
+            AlbumItem(
+                album = album,
+                onClickItem = onClickItem
+            )
         }
     }
 }
@@ -93,7 +99,8 @@ private fun AlbumListPreview() {
     MusicPlayerTheme {
         Surface {
             AlbumList(
-                albums = dummyAlbums
+                albums = dummyAlbums,
+                onClickItem = {}
             )
         }
     }

@@ -2,6 +2,7 @@ package com.yongjin.musicplayer.feature.library
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.content.res.Configuration.UI_MODE_TYPE_NORMAL
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
@@ -24,9 +25,16 @@ import com.yongjin.musicplayer.feature.dummyAlbums
 import com.yongjin.musicplayer.model.Album
 
 @Composable
-fun AlbumItem(album: Album) {
+fun AlbumItem(
+    album: Album,
+    onClickItem: (Album) -> Unit,
+) {
     Card(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                onClickItem(album)
+            }
     ) {
         Column(
             modifier = Modifier.fillMaxWidth(),
@@ -75,7 +83,8 @@ private fun AlbumPreview() {
     MusicPlayerTheme {
         Surface {
             AlbumItem(
-                album = dummyAlbums.random()
+                album = dummyAlbums.random(),
+                onClickItem = {}
             )
         }
     }

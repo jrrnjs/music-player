@@ -1,5 +1,6 @@
 plugins {
     id("musicplayer.android.feature")
+    alias(libs.plugins.kotlinx.serialization)
 }
 
 android {
@@ -10,4 +11,5 @@ dependencies {
     implementation(project(":designsystem"))
     implementation(project(":data"))
     implementation(project(":model"))
+    implementation(libs.kotlinx.serialization.json)
 }
