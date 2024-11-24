@@ -10,4 +10,5 @@ android {
 dependencies {
     implementation(project(":model"))
     implementation(libs.androidx.media3.session)
+    implementation(libs.kotlinx.coroutines.guava)
 }
