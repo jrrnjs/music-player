@@ -11,5 +11,6 @@ dependencies {
     implementation(project(":designsystem"))
     implementation(project(":data"))
     implementation(project(":model"))
+    implementation(project(":media-core"))
     implementation(libs.kotlinx.serialization.json)
 }
