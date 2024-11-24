@@ -83,7 +83,7 @@ private fun AlbumPreview() {
     MusicPlayerTheme {
         Surface {
             AlbumItem(
-                album = dummyAlbums.random(),
+                album = dummyAlbums.first(),
                 onClickItem = {}
             )
         }

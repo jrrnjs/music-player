@@ -151,7 +151,7 @@ private fun AlbumHeaderPreview() {
     MusicPlayerTheme {
         Surface {
             AlbumHeader(
-                album = dummyAlbums.random(),
+                album = dummyAlbums.first(),
             )
         }
     }
@@ -163,7 +163,7 @@ private fun SongItemPreview() {
     MusicPlayerTheme {
         Surface {
             SongItem(
-                song = dummySongs.random()
+                song = dummySongs.first()
             )
         }
     }

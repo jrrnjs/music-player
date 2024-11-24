@@ -85,7 +85,7 @@ private fun AlbumScreen(
 private fun AlbumScreenPreview() {
     MusicPlayerTheme {
         AlbumScreen(
-            album = dummyAlbums.random(),
+            album = dummyAlbums.first(),
             songs = dummySongs,
             onNavigationClick = {}
         )
