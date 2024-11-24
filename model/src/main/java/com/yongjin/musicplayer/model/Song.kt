@@ -11,6 +11,7 @@ data class Song(
     val title: String?,
     val duration: Int,
     val track: Int,
+    val thumbnailUri: Uri,
     val contentUri: Uri,
 ) {
     private val min = duration / 60000

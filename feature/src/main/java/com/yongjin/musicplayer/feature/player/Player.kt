@@ -28,14 +28,17 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.yongjin.musicplayer.designsystem.theme.MusicPlayerTheme
 import com.yongjin.musicplayer.feature.R
+import com.yongjin.musicplayer.feature.dummyPlayer
+import com.yongjin.musicplayer.model.Song
 
 @Composable
 internal fun PlayerThumbnail(
+    song: Song,
     modifier: Modifier = Modifier,
 ) {
     AsyncImage(
         modifier = modifier.clip(MaterialTheme.shapes.small),
-        model = "https://i.ebayimg.com/images/g/n8IAAOSwltRkNCSF/s-l1200.png",
+        model = song.thumbnailUri,
         placeholder = ColorPainter(Color.LightGray),
         error = ColorPainter(Color.LightGray),
         contentDescription = "album art"
@@ -44,6 +47,8 @@ internal fun PlayerThumbnail(
 
 @Composable
 internal fun PlayerCollapsed(
+    state: PlayerState,
+    onPlayClick: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -53,14 +58,14 @@ internal fun PlayerCollapsed(
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "우리의 이야기",
+                text = state.song.title ?: "",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 overflow = TextOverflow.Ellipsis
             )
 
             Text(
-                text = "MeloMance",
+                text = state.song.artist ?: "",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 overflow = TextOverflow.Ellipsis
@@ -69,11 +74,18 @@ internal fun PlayerCollapsed(
 
         IconButton(
             onClick = {
-
-            }) {
+                onPlayClick(state.isPlaying)
+            }
+        ) {
             Icon(
-                imageVector = ImageVector.vectorResource(R.drawable.baseline_play_arrow_24),
-                contentDescription = "play"
+                imageVector = when (state.isPlaying) {
+                    true -> ImageVector.vectorResource(R.drawable.baseline_pause_24)
+                    false -> ImageVector.vectorResource(R.drawable.baseline_play_arrow_24)
+                },
+                contentDescription = when (state.isPlaying) {
+                    true -> "pause"
+                    false -> "play"
+                }
             )
         }
     }
@@ -82,20 +94,26 @@ internal fun PlayerCollapsed(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun PlayerExpanded(
+    state: PlayerState,
+    onPlayClick: (Boolean) -> Unit,
+    onPrevClick: () -> Unit,
+    onNextClick: () -> Unit,
+    onRepeatClick: (RepeatState) -> Unit,
+    onShuffleClick: (ShuffleState) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
         modifier = modifier
     ) {
         Text(
-            text = "우리의 이야기",
+            text = state.song.title ?: "",
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onSurface,
             fontWeight = FontWeight.SemiBold
         )
         Text(
             modifier = Modifier.padding(top = 6.dp),
-            text = "MeloMance",
+            text = state.song.artist ?: "",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontWeight = FontWeight.Normal
@@ -113,16 +131,20 @@ internal fun PlayerExpanded(
         ) {
             IconButton(
                 modifier = Modifier.weight(1f),
-                onClick = {}
+                onClick = {
+                    onRepeatClick(state.repeatState)
+                }
             ) {
                 Icon(
-                    imageVector = ImageVector.vectorResource(R.drawable.baseline_repeat_24),
-                    contentDescription = "repeat"
+                    imageVector = ImageVector.vectorResource(state.repeatState.icon),
+                    contentDescription = state.repeatState.contentDescription
                 )
             }
             IconButton(
                 modifier = Modifier.weight(1f),
-                onClick = {}
+                onClick = {
+                    onPrevClick()
+                }
             ) {
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.baseline_skip_previous_24),
@@ -131,16 +153,26 @@ internal fun PlayerExpanded(
             }
             IconButton(
                 modifier = Modifier.weight(1f),
-                onClick = {}
+                onClick = {
+                    onPlayClick(state.isPlaying)
+                }
             ) {
                 Icon(
-                    imageVector = ImageVector.vectorResource(R.drawable.baseline_play_arrow_24),
-                    contentDescription = "play"
+                    imageVector = when (state.isPlaying) {
+                        true -> ImageVector.vectorResource(R.drawable.baseline_pause_24)
+                        false -> ImageVector.vectorResource(R.drawable.baseline_play_arrow_24)
+                    },
+                    contentDescription = when (state.isPlaying) {
+                        true -> "pause"
+                        false -> "play"
+                    }
                 )
             }
             IconButton(
                 modifier = Modifier.weight(1f),
-                onClick = {}
+                onClick = {
+                    onNextClick()
+                }
             ) {
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.baseline_skip_next_24),
@@ -149,11 +181,13 @@ internal fun PlayerExpanded(
             }
             IconButton(
                 modifier = Modifier.weight(1f),
-                onClick = {}
+                onClick = {
+                    onShuffleClick(state.shuffleState)
+                }
             ) {
                 Icon(
-                    imageVector = ImageVector.vectorResource(R.drawable.baseline_shuffle_24),
-                    contentDescription = "shuffle"
+                    imageVector = ImageVector.vectorResource(state.shuffleState.icon),
+                    contentDescription = state.shuffleState.contentDescription
                 )
             }
         }
@@ -167,7 +201,9 @@ private fun PlayerCollapsedPreview() {
         Surface {
             PlayerCollapsed(
                 modifier = Modifier
-                    .padding(8.dp)
+                    .padding(8.dp),
+                state = dummyPlayer,
+                onPlayClick = {},
             )
         }
     }
@@ -180,7 +216,13 @@ private fun PlayerExpandedPreview() {
         Surface {
             PlayerExpanded(
                 modifier = Modifier
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                state = dummyPlayer,
+                onPlayClick = {},
+                onPrevClick = {},
+                onNextClick = {},
+                onShuffleClick = {},
+                onRepeatClick = {}
             )
         }
     }

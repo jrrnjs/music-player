@@ -93,9 +93,10 @@ class MediaDataSource @Inject constructor(
                 val title = it.getString(titleColumn)
                 val duration = it.getInt(durationColumn)
                 val track = it.getInt(trackColumn)
+                val thumbnailUri = ContentUris.withAppendedId(EXTERNAL_ALBUM_ART_URI, albumId)
                 val contentUri = ContentUris.withAppendedId(uri, id)
                 songs.add(
-                    Song(id, album, artist, title, duration, track, contentUri)
+                    Song(id, album, artist, title, duration, track, thumbnailUri, contentUri)
                 )
             }
         }

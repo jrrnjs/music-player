@@ -30,17 +30,40 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.yongjin.musicplayer.feature.extensions.toDp
 import com.yongjin.musicplayer.feature.extensions.toPx
 import kotlin.math.roundToInt
 
+
+@Composable
+fun PlayerScreen(
+    viewModel: PlayerViewModel = hiltViewModel(),
+) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    PlayerScreen(
+        state = state,
+        onPlayClick = {},
+        onPrevClick = {},
+        onNextClick = {},
+        onRepeatClick = {},
+        onShuffleClick = {}
+    )
+}
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PlayerScreen(
-    modifier: Modifier = Modifier
+    state: PlayerState,
+    onPlayClick: (Boolean) -> Unit,
+    onPrevClick: () -> Unit,
+    onNextClick: () -> Unit,
+    onRepeatClick: (RepeatState) -> Unit,
+    onShuffleClick: (ShuffleState) -> Unit,
 ) {
     BoxWithConstraints(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
     ) {
         val screenWidth = constraints.maxWidth.toFloat()
@@ -49,7 +72,7 @@ fun PlayerScreen(
         val expandedHeight = constraints.maxHeight.toFloat()
         val heightRange = expandedHeight - collapsedHeight
 
-        val state = remember {
+        val draggableState = remember {
             AnchoredDraggableState(
                 initialValue = State.COLLAPSED,
                 anchors = DraggableAnchors {
@@ -64,7 +87,7 @@ fun PlayerScreen(
         }
 
         val heightDelta by remember {
-            derivedStateOf { state.offset - collapsedHeight }
+            derivedStateOf { draggableState.offset - collapsedHeight }
         }
         val progress = (heightDelta / heightRange).coerceIn(0f, 1f)
 
@@ -73,9 +96,9 @@ fun PlayerScreen(
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.surfaceVariant)
                 .align(Alignment.BottomCenter)
-                .anchoredDraggable(state, reverseDirection = true, Orientation.Vertical)
+                .anchoredDraggable(draggableState, reverseDirection = true, Orientation.Vertical)
                 .navigationBarsPadding()
-                .height(state.offset.toDp())
+                .height(draggableState.offset.toDp())
         ) {
             val thumbMinPadding = 8.dp.toPx()
             val thumbMaxVerticalPadding = 72.dp.toPx()
@@ -95,7 +118,8 @@ fun PlayerScreen(
                         vertical = thumbVerticalPadding.toDp(),
                         horizontal = thumbHorizontalPadding.toDp()
                     )
-                    .size(thumbSize.toDp())
+                    .size(thumbSize.toDp()),
+                song = state.song
             )
 
             if (progress <= 0.5f) {
@@ -112,7 +136,9 @@ fun PlayerScreen(
                         )
                         .offset { IntOffset(0, collapsePlayerOffset) }
                         .alpha(1 - collapseProgress)
-                        .align(Alignment.Center)
+                        .align(Alignment.Center),
+                    state = state,
+                    onPlayClick = onPlayClick
                 )
             }
 
@@ -134,7 +160,13 @@ fun PlayerScreen(
                         .alpha(expandProgress)
                         .onGloballyPositioned {
                             expandPlayerHeight = it.size.height
-                        }
+                        },
+                    state = state,
+                    onPlayClick = onPlayClick,
+                    onPrevClick = onPrevClick,
+                    onNextClick = onNextClick,
+                    onRepeatClick = onRepeatClick,
+                    onShuffleClick = onShuffleClick
                 )
             }
         }
