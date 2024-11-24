@@ -7,8 +7,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -20,6 +23,7 @@ import com.yongjin.musicplayer.designsystem.theme.MusicPlayerTheme
 import com.yongjin.musicplayer.feature.MusicPlayerRoute
 import com.yongjin.musicplayer.feature.album.AlbumScreen
 import com.yongjin.musicplayer.feature.library.LibraryScreen
+import com.yongjin.musicplayer.feature.player.PlayerScreen
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -41,33 +45,37 @@ class MainActivity : ComponentActivity() {
 
                 when {
                     permissionState.status.isGranted -> {
-                        NavHost(
-                            modifier = Modifier.fillMaxSize(),
-                            navController = navController,
-                            startDestination = MusicPlayerRoute.Library
-                        ) {
-                            composable<MusicPlayerRoute.Library> {
-                                LibraryScreen(
-                                    navigateAlbum = {
-                                        navController.navigate(MusicPlayerRoute.AlbumDetail(it))
-                                    }
-                                )
-                            }
-                            composable<MusicPlayerRoute.AlbumDetail>(
-                                typeMap = MusicPlayerRoute.AlbumDetail.typeMap
+                        Surface(modifier = Modifier.fillMaxSize()) {
+                            NavHost(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(bottom = 72.dp),
+                                navController = navController,
+                                startDestination = MusicPlayerRoute.Library
                             ) {
-                                AlbumScreen(
-                                    navigateUp = {
-                                        navController.navigateUp()
-                                    }
-                                )
+                                composable<MusicPlayerRoute.Library> {
+                                    LibraryScreen(
+                                        navigateAlbum = {
+                                            navController.navigate(MusicPlayerRoute.AlbumDetail(it))
+                                        }
+                                    )
+                                }
+                                composable<MusicPlayerRoute.AlbumDetail>(
+                                    typeMap = MusicPlayerRoute.AlbumDetail.typeMap
+                                ) {
+                                    AlbumScreen(
+                                        navigateUp = {
+                                            navController.navigateUp()
+                                        }
+                                    )
+                                }
                             }
+                            PlayerScreen()
                         }
                     }
 
                     else -> PermissionDeniedScreen()
                 }
-
                 LaunchedEffect(Unit) {
                     if (!permissionState.status.shouldShowRationale) {
                         permissionState.launchPermissionRequest()
