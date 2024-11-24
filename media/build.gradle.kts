@@ -1,5 +1,6 @@
 plugins {
     id("musicplayer.android.library")
+    id("musicplayer.android.hilt")
 }
 
 android {
@@ -10,4 +11,5 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.media3.session)
     implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.kotlinx.coroutines.guava)
 }
