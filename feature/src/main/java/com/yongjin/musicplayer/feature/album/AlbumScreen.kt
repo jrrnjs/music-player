@@ -35,7 +35,10 @@ fun AlbumScreen(
     AlbumScreen(
         album = state.album,
         songs = state.songs,
-        onNavigationClick = navigateUp
+        onNavigationClick = navigateUp,
+        onPlayAlbumClick = viewModel::playAlbum,
+        onShuffleClick = viewModel::shuffleAndPlayAlbum,
+        onSongClick = viewModel::playSong
     )
 }
 
@@ -44,6 +47,9 @@ fun AlbumScreen(
 private fun AlbumScreen(
     album: Album,
     songs: ImmutableList<Song>,
+    onPlayAlbumClick: () -> Unit,
+    onShuffleClick: () -> Unit,
+    onSongClick: (Song) -> Unit,
     onNavigationClick: () -> Unit,
 ) {
     Scaffold(
@@ -67,13 +73,20 @@ private fun AlbumScreen(
                 .padding(it)
         ) {
             item(key = "header") {
-                AlbumHeader(album)
+                AlbumHeader(
+                    album = album,
+                    onPlayAlbumClick = onPlayAlbumClick,
+                    onShuffleClick = onShuffleClick
+                )
             }
             items(
                 items = songs,
                 key = { it.id }
             ) {
-                SongItem(it)
+                SongItem(
+                    song = it,
+                    onSongClick = onSongClick
+                )
             }
         }
     }
@@ -87,7 +100,10 @@ private fun AlbumScreenPreview() {
         AlbumScreen(
             album = dummyAlbums.first(),
             songs = dummySongs,
-            onNavigationClick = {}
+            onNavigationClick = {},
+            onPlayAlbumClick = {},
+            onShuffleClick = {},
+            onSongClick = {}
         )
     }
 }

@@ -11,6 +11,7 @@ dependencies {
     implementation(project(":designsystem"))
     implementation(project(":data"))
     implementation(project(":model"))
-    implementation(project(":media-core"))
+    implementation(project(":media-controller"))
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.androidx.media3.common)
 }

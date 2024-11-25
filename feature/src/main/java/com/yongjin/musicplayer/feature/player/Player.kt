@@ -1,19 +1,24 @@
 package com.yongjin.musicplayer.feature.player
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,16 +34,18 @@ import coil3.compose.AsyncImage
 import com.yongjin.musicplayer.designsystem.theme.MusicPlayerTheme
 import com.yongjin.musicplayer.feature.R
 import com.yongjin.musicplayer.feature.dummyPlayer
+import com.yongjin.musicplayer.feature.extensions.toMinuteSecondFormat
 import com.yongjin.musicplayer.model.Song
+import kotlin.math.roundToLong
 
 @Composable
 internal fun PlayerThumbnail(
-    song: Song,
+    song: Song?,
     modifier: Modifier = Modifier,
 ) {
     AsyncImage(
         modifier = modifier.clip(MaterialTheme.shapes.small),
-        model = song.thumbnailUri,
+        model = song?.thumbnailUri,
         placeholder = ColorPainter(Color.LightGray),
         error = ColorPainter(Color.LightGray),
         contentDescription = "album art"
@@ -58,14 +65,14 @@ internal fun PlayerCollapsed(
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = state.song.title ?: "",
+                text = state.song?.title ?: "",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 overflow = TextOverflow.Ellipsis
             )
 
             Text(
-                text = state.song.artist ?: "",
+                text = state.song?.artist ?: "",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 overflow = TextOverflow.Ellipsis
@@ -91,7 +98,6 @@ internal fun PlayerCollapsed(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun PlayerExpanded(
     state: PlayerState,
@@ -100,37 +106,76 @@ internal fun PlayerExpanded(
     onNextClick: () -> Unit,
     onRepeatClick: (RepeatState) -> Unit,
     onShuffleClick: (ShuffleState) -> Unit,
+    onPositionChanged: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
         modifier = modifier
     ) {
         Text(
-            text = state.song.title ?: "",
+            text = state.song?.title ?: "",
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onSurface,
             fontWeight = FontWeight.SemiBold
         )
         Text(
             modifier = Modifier.padding(top = 6.dp),
-            text = state.song.artist ?: "",
+            text = state.song?.artist ?: "",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontWeight = FontWeight.Normal
         )
 
+        var isUserChanging by remember { mutableStateOf(false) }
+        var current by remember { mutableLongStateOf(state.currentPosition) }
+        val total = state.song?.duration ?: 0
+
+        LaunchedEffect(state.currentPosition) {
+            if (!isUserChanging) {
+                current = state.currentPosition
+            }
+        }
+
         Slider(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 16.dp),
-            state = SliderState()
+            value = current.toFloat(),
+            valueRange = 0f..total.toFloat(),
+            onValueChange = {
+                isUserChanging = true
+                current = it.roundToLong()
+            },
+            onValueChangeFinished = {
+                isUserChanging = false
+                onPositionChanged(current)
+            }
         )
 
-        Row(
+        Box(
             modifier = Modifier.fillMaxWidth()
         ) {
+            Text(
+                modifier = Modifier.align(Alignment.CenterStart),
+                text = current.toMinuteSecondFormat(),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                modifier = Modifier.align(Alignment.CenterEnd),
+                text = total.toMinuteSecondFormat(),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 6.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
             IconButton(
-                modifier = Modifier.weight(1f),
                 onClick = {
                     onRepeatClick(state.repeatState)
                 }
@@ -141,7 +186,6 @@ internal fun PlayerExpanded(
                 )
             }
             IconButton(
-                modifier = Modifier.weight(1f),
                 onClick = {
                     onPrevClick()
                 }
@@ -152,7 +196,6 @@ internal fun PlayerExpanded(
                 )
             }
             IconButton(
-                modifier = Modifier.weight(1f),
                 onClick = {
                     onPlayClick(state.isPlaying)
                 }
@@ -169,7 +212,6 @@ internal fun PlayerExpanded(
                 )
             }
             IconButton(
-                modifier = Modifier.weight(1f),
                 onClick = {
                     onNextClick()
                 }
@@ -180,7 +222,6 @@ internal fun PlayerExpanded(
                 )
             }
             IconButton(
-                modifier = Modifier.weight(1f),
                 onClick = {
                     onShuffleClick(state.shuffleState)
                 }
@@ -222,7 +263,8 @@ private fun PlayerExpandedPreview() {
                 onPrevClick = {},
                 onNextClick = {},
                 onShuffleClick = {},
-                onRepeatClick = {}
+                onRepeatClick = {},
+                onPositionChanged = {}
             )
         }
     }

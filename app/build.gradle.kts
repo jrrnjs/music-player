@@ -21,6 +21,7 @@ dependencies {
     implementation(project(":data"))
     implementation(project(":model"))
     implementation(project(":media-core"))
+    implementation(project(":media-controller"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

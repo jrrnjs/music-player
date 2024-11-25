@@ -9,13 +9,8 @@ data class Song(
     val album: String?,
     val artist: String?,
     val title: String?,
-    val duration: Int,
+    val duration: Long,
     val track: Int,
-    val thumbnailUri: Uri,
-    val contentUri: Uri,
-) {
-    private val min = duration / 60000
-    private val sec = duration % 60000 / 1000
-
-    val displayDuration: String = "%d:%02d".format(min, sec)
-}
+    val thumbnailUri: Uri?,
+    val contentUri: Uri?,
+)

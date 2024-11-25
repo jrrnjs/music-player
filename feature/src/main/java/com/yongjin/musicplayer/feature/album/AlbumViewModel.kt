@@ -7,6 +7,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.yongjin.musicplayer.data.MediaDataSource
 import com.yongjin.musicplayer.feature.MusicPlayerRoute
+import com.yongjin.musicplayer.feature.extensions.toMediaItem
+import com.yongjin.musicplayer.media.PlaybackController
 import com.yongjin.musicplayer.model.Album
 import com.yongjin.musicplayer.model.Song
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,6 +25,7 @@ import javax.inject.Inject
 @HiltViewModel
 class AlbumViewModel @Inject constructor(
     private val mediaDataSource: MediaDataSource,
+    private val playbackController: PlaybackController,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -37,6 +40,32 @@ class AlbumViewModel @Inject constructor(
 
     init {
         getSongs(albumId = album.id)
+    }
+
+    fun playSong(song: Song) {
+        viewModelScope.launch {
+            val mediaItem = song.toMediaItem()
+            playbackController.play(mediaItem)
+        }
+    }
+
+    fun playAlbum() {
+        viewModelScope.launch {
+            val mediaItems = state.value.songs.map {
+                it.toMediaItem()
+            }
+            playbackController.play(mediaItems)
+        }
+    }
+
+    fun shuffleAndPlayAlbum() {
+        viewModelScope.launch {
+            val mediaItems = state.value.songs.map {
+                it.toMediaItem()
+            }
+            playbackController.changeShuffleMode(true)
+            playbackController.play(mediaItems)
+        }
     }
 
     private fun getSongs(albumId: Long) {

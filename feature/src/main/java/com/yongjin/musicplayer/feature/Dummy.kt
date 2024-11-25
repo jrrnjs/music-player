@@ -185,7 +185,7 @@ internal val dummySongs = persistentListOf(
 
 internal val dummyPlayer = PlayerState(
     song = dummySongs.first(),
-    playingTime = 1000 * 60 * 1 + 1000 * 11,
+    currentPosition = 1000 * 60 * 1 + 1000 * 11,
     isPlaying = true,
     shuffleState = ShuffleState.SHUFFLE_ON,
     repeatState = RepeatState.REPEAT_ONE

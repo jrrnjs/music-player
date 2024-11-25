@@ -44,11 +44,18 @@ fun PlayerScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     PlayerScreen(
         state = state,
-        onPlayClick = {},
-        onPrevClick = {},
-        onNextClick = {},
-        onRepeatClick = {},
-        onShuffleClick = {}
+        onPlayClick = { isPlaying ->
+            if (isPlaying) {
+                viewModel.pause()
+            } else {
+                viewModel.play()
+            }
+        },
+        onPrevClick = viewModel::skipPrevious,
+        onNextClick = viewModel::skipNext,
+        onRepeatClick = viewModel::changeRepeatMode,
+        onShuffleClick = viewModel::changeShuffleMode,
+        onPositionChanged = viewModel::seekTo
     )
 }
 
@@ -61,6 +68,7 @@ fun PlayerScreen(
     onNextClick: () -> Unit,
     onRepeatClick: (RepeatState) -> Unit,
     onShuffleClick: (ShuffleState) -> Unit,
+    onPositionChanged: (Long) -> Unit,
 ) {
     BoxWithConstraints(
         modifier = Modifier
@@ -166,7 +174,8 @@ fun PlayerScreen(
                     onPrevClick = onPrevClick,
                     onNextClick = onNextClick,
                     onRepeatClick = onRepeatClick,
-                    onShuffleClick = onShuffleClick
+                    onShuffleClick = onShuffleClick,
+                    onPositionChanged = onPositionChanged
                 )
             }
         }

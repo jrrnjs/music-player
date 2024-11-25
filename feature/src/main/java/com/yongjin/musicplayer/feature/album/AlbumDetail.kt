@@ -1,5 +1,6 @@
 package com.yongjin.musicplayer.feature.album
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,12 +31,15 @@ import com.yongjin.musicplayer.designsystem.theme.MusicPlayerTheme
 import com.yongjin.musicplayer.feature.R
 import com.yongjin.musicplayer.feature.dummyAlbums
 import com.yongjin.musicplayer.feature.dummySongs
+import com.yongjin.musicplayer.feature.extensions.toMinuteSecondFormat
 import com.yongjin.musicplayer.model.Album
 import com.yongjin.musicplayer.model.Song
 
 @Composable
 fun AlbumHeader(
     album: Album,
+    onPlayAlbumClick: () -> Unit,
+    onShuffleClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
@@ -82,7 +86,7 @@ fun AlbumHeader(
         ) {
             Button(
                 modifier = Modifier.weight(1f),
-                onClick = {}
+                onClick = onPlayAlbumClick
             ) {
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.baseline_play_arrow_24),
@@ -91,7 +95,7 @@ fun AlbumHeader(
             }
             Button(
                 modifier = Modifier.weight(1f),
-                onClick = {}
+                onClick = onShuffleClick
             ) {
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.baseline_shuffle_24),
@@ -105,12 +109,14 @@ fun AlbumHeader(
 @Composable
 fun SongItem(
     song: Song,
+    onSongClick: (Song) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .heightIn(min = 64.dp),
+            .heightIn(min = 64.dp)
+            .clickable { onSongClick(song) },
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
@@ -130,7 +136,7 @@ fun SongItem(
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
-                text = "${song.artist ?: ""} · ${song.displayDuration}",
+                text = "${song.artist ?: ""} · ${song.duration.toMinuteSecondFormat()}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -152,6 +158,8 @@ private fun AlbumHeaderPreview() {
         Surface {
             AlbumHeader(
                 album = dummyAlbums.first(),
+                onPlayAlbumClick = {},
+                onShuffleClick = {}
             )
         }
     }
@@ -163,7 +171,8 @@ private fun SongItemPreview() {
     MusicPlayerTheme {
         Surface {
             SongItem(
-                song = dummySongs.first()
+                song = dummySongs.first(),
+                onSongClick = {}
             )
         }
     }
