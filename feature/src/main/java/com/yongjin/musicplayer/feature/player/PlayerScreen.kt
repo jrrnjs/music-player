@@ -17,7 +17,10 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -28,10 +31,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.yongjin.musicplayer.designsystem.theme.MusicPlayerTheme
+import com.yongjin.musicplayer.feature.dummyPlayer
 import com.yongjin.musicplayer.feature.extensions.toDp
 import com.yongjin.musicplayer.feature.extensions.toPx
 import kotlin.math.roundToInt
@@ -63,7 +69,7 @@ fun PlayerScreen(
     )
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun PlayerScreen(
     state: PlayerState,
@@ -154,6 +160,18 @@ fun PlayerScreen(
                     state = state,
                     onPlayClick = onPlayClick
                 )
+
+                if (state.song?.duration != null) {
+                    LinearProgressIndicator(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .alpha(1 - collapseProgress)
+                            .align(Alignment.BottomCenter),
+                        progress = {
+                            state.currentPosition / state.song.duration.toFloat()
+                        }
+                    )
+                }
             }
 
             if (progress >= 0.5f) {
@@ -192,4 +210,24 @@ fun PlayerScreen(
 
 private enum class State {
     COLLAPSED, EXPANDED
+}
+
+@PreviewLightDark
+@Composable
+private fun PlayerScreenPreview() {
+    MusicPlayerTheme {
+        Surface {
+            PlayerScreen(
+                state = dummyPlayer,
+                volumeState = VolumeState(3, 15),
+                onPlayClick = {},
+                onPrevClick = {},
+                onNextClick = {},
+                onRepeatClick = {},
+                onShuffleClick = {},
+                onPositionChanged = {},
+                onVolumeChanged = {}
+            )
+        }
+    }
 }
