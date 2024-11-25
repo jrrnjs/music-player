@@ -2,12 +2,7 @@ package com.yongjin.musicplayer.media.di
 
 import android.content.ComponentName
 import android.content.Context
-import androidx.media3.common.AudioAttributes
-import androidx.media3.common.C
-import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.session.MediaSession
 import androidx.media3.session.SessionToken
-import com.yongjin.musicplayer.media.MediaSessionCallback
 import com.yongjin.musicplayer.media.PlaybackService
 import dagger.Module
 import dagger.Provides
@@ -18,30 +13,6 @@ import dagger.hilt.components.SingletonComponent
 @Module
 @InstallIn(SingletonComponent::class)
 object MediaModule {
-
-    @Provides
-    fun providesExoPlayer(
-        @ApplicationContext context: Context,
-    ): ExoPlayer {
-        val audioAttributes = AudioAttributes.Builder()
-            .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
-            .setUsage(C.USAGE_MEDIA)
-            .build()
-
-        return ExoPlayer.Builder(context)
-            .setAudioAttributes(audioAttributes, true)
-            .build()
-    }
-
-    @Provides
-    fun provideMediaSession(
-        @ApplicationContext context: Context,
-        player: ExoPlayer,
-    ): MediaSession {
-        return MediaSession.Builder(context, player)
-            .setCallback(MediaSessionCallback())
-            .build()
-    }
 
     @Provides
     fun provideSessionToken(
