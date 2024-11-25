@@ -42,8 +42,11 @@ fun PlayerScreen(
     viewModel: PlayerViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val volumeState by viewModel.volumeState.collectAsStateWithLifecycle()
+
     PlayerScreen(
         state = state,
+        volumeState = volumeState,
         onPlayClick = { isPlaying ->
             if (isPlaying) {
                 viewModel.pause()
@@ -55,7 +58,8 @@ fun PlayerScreen(
         onNextClick = viewModel::skipNext,
         onRepeatClick = viewModel::changeRepeatMode,
         onShuffleClick = viewModel::changeShuffleMode,
-        onPositionChanged = viewModel::seekTo
+        onPositionChanged = viewModel::seekTo,
+        onVolumeChanged = viewModel::setVolume
     )
 }
 
@@ -63,12 +67,14 @@ fun PlayerScreen(
 @Composable
 fun PlayerScreen(
     state: PlayerState,
+    volumeState: VolumeState,
     onPlayClick: (Boolean) -> Unit,
     onPrevClick: () -> Unit,
     onNextClick: () -> Unit,
     onRepeatClick: (RepeatState) -> Unit,
     onShuffleClick: (ShuffleState) -> Unit,
     onPositionChanged: (Long) -> Unit,
+    onVolumeChanged: (Int) -> Unit,
 ) {
     BoxWithConstraints(
         modifier = Modifier
@@ -170,12 +176,14 @@ fun PlayerScreen(
                             expandPlayerHeight = it.size.height
                         },
                     state = state,
+                    volumeState = volumeState,
                     onPlayClick = onPlayClick,
                     onPrevClick = onPrevClick,
                     onNextClick = onNextClick,
                     onRepeatClick = onRepeatClick,
                     onShuffleClick = onShuffleClick,
-                    onPositionChanged = onPositionChanged
+                    onPositionChanged = onPositionChanged,
+                    onVolumeChanged = onVolumeChanged
                 )
             }
         }

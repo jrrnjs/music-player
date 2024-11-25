@@ -36,6 +36,7 @@ import com.yongjin.musicplayer.feature.R
 import com.yongjin.musicplayer.feature.dummyPlayer
 import com.yongjin.musicplayer.feature.extensions.toMinuteSecondFormat
 import com.yongjin.musicplayer.model.Song
+import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
 @Composable
@@ -101,12 +102,14 @@ internal fun PlayerCollapsed(
 @Composable
 internal fun PlayerExpanded(
     state: PlayerState,
+    volumeState: VolumeState,
     onPlayClick: (Boolean) -> Unit,
     onPrevClick: () -> Unit,
     onNextClick: () -> Unit,
     onRepeatClick: (RepeatState) -> Unit,
     onShuffleClick: (ShuffleState) -> Unit,
     onPositionChanged: (Long) -> Unit,
+    onVolumeChanged: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -232,6 +235,25 @@ internal fun PlayerExpanded(
                 )
             }
         }
+
+
+        Slider(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp),
+            value = volumeState.current.toFloat(),
+            valueRange = 0f..volumeState.max.toFloat(),
+            steps = volumeState.max + 1,
+            onValueChange = {
+                onVolumeChanged(it.roundToInt())
+            }
+        )
+
+        Text(
+            text = "Volume",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
@@ -259,11 +281,13 @@ private fun PlayerExpandedPreview() {
                 modifier = Modifier
                     .padding(horizontal = 16.dp, vertical = 8.dp),
                 state = dummyPlayer,
+                volumeState = VolumeState(3, 15),
                 onPlayClick = {},
                 onPrevClick = {},
                 onNextClick = {},
                 onShuffleClick = {},
                 onRepeatClick = {},
+                onVolumeChanged = {},
                 onPositionChanged = {}
             )
         }
