@@ -147,8 +147,10 @@ class PlaybackControllerImpl @Inject constructor(
         try {
             val mediaController = ensureMediaController()
             action(mediaController)
-        } catch (e: Exception) {
-            ensureMediaController()
+        } catch (_: Exception) {
+            mediaController?.removeListener(this)
+            mediaController?.release()
+            mediaController = null
         }
     }
 
@@ -168,8 +170,6 @@ class PlaybackControllerImpl @Inject constructor(
                         _mediaState.emit(ready)
                     }
                 } catch (e: Exception) {
-                    mediaController?.removeListener(this)
-                    mediaController = null
                     throw e
                 }
             }
