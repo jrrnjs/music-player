@@ -25,6 +25,7 @@ internal fun Project.configureAndroidCompose(
     }
 
     extensions.configure<ComposeCompilerGradlePluginExtension> {
+        enableStrongSkippingMode.set(true)
         fun relativeToRootProject(dir: String) =
             rootProject.layout.buildDirectory.dir(projectDir.toRelativeString(rootDir))
                 .map { it.dir(dir) }
