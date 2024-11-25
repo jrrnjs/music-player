@@ -5,3 +5,11 @@ fun Long.toMinuteSecondFormat(): String {
     val sec = this % 60000 / 1000
     return "%d:%02d".format(min, sec)
 }
+
+fun Int.toTrackFormat(): String {
+    return if (this == 0) {
+        "-"
+    } else {
+        "%02d".format(this)
+    }
+}

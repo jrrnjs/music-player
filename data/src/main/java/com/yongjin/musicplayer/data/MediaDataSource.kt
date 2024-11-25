@@ -92,7 +92,8 @@ class MediaDataSource @Inject constructor(
                 val artist = it.getString(artistColumn)
                 val title = it.getString(titleColumn)
                 val duration = it.getInt(durationColumn)
-                val track = it.getInt(trackColumn)
+                // 1013 -> 1 disk, 13 track
+                val track = it.getInt(trackColumn) % 100
                 val thumbnailUri = ContentUris.withAppendedId(EXTERNAL_ALBUM_ART_URI, albumId)
                 val contentUri = ContentUris.withAppendedId(uri, id)
                 songs.add(
@@ -100,7 +101,7 @@ class MediaDataSource @Inject constructor(
                 )
             }
         }
-        return@withContext songs
+        return@withContext songs.sortedBy { it.track }
     }
 
     companion object {

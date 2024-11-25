@@ -32,6 +32,7 @@ import com.yongjin.musicplayer.feature.R
 import com.yongjin.musicplayer.feature.dummyAlbums
 import com.yongjin.musicplayer.feature.dummySongs
 import com.yongjin.musicplayer.feature.extensions.toMinuteSecondFormat
+import com.yongjin.musicplayer.feature.extensions.toTrackFormat
 import com.yongjin.musicplayer.model.Album
 import com.yongjin.musicplayer.model.Song
 
@@ -121,7 +122,7 @@ fun SongItem(
     ) {
         Text(
             modifier = Modifier.padding(start = 16.dp),
-            text = song.track.toString(),
+            text = song.track.toTrackFormat(),
             style = MaterialTheme.typography.titleLarge
         )
 
