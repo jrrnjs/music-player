@@ -69,6 +69,7 @@ internal fun PlayerCollapsed(
                 text = state.song?.title ?: "",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
 
@@ -76,6 +77,7 @@ internal fun PlayerCollapsed(
                 text = state.song?.artist ?: "",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
         }
