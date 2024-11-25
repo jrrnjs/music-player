@@ -1,8 +1,10 @@
 package com.yongjin.musicplayer.media
 
+import android.media.AudioManager
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.session.MediaController
+import com.yongjin.musicplayer.media.audio.AudioFocusManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -23,6 +25,7 @@ import javax.inject.Singleton
 @Singleton
 class PlaybackControllerImpl @Inject constructor(
     private val mediaControllerProvider: MediaControllerProvider,
+    private val audioFocusManager: AudioFocusManager,
 ) : PlaybackController, Player.Listener {
 
     private var mediaController: MediaController? = null
@@ -47,22 +50,20 @@ class PlaybackControllerImpl @Inject constructor(
         performAction {
             it.setMediaItem(mediaItem)
             it.prepare()
-            it.play()
         }
+        playWithAudioFocus()
     }
 
     override suspend fun play(mediaItems: List<MediaItem>) {
         performAction {
             it.setMediaItems(mediaItems)
             it.prepare()
-            it.play()
         }
+        playWithAudioFocus()
     }
 
     override suspend fun play() {
-        performAction {
-            it.play()
-        }
+        playWithAudioFocus()
     }
 
     override suspend fun pause() {
@@ -144,7 +145,49 @@ class PlaybackControllerImpl @Inject constructor(
         }
     }
 
-    private suspend fun performAction(action: (MediaController) -> Unit) {
+    // AudioFocus
+    private fun requestAudioFocus(): Boolean {
+        if (audioFocusManager.hasAudioFocus) {
+            return true
+        }
+
+        return audioFocusManager.requestAudioFocus { focusChange ->
+            coroutineScope.launch {
+                when (focusChange) {
+                    AudioManager.AUDIOFOCUS_GAIN -> {
+                        forcePlay()
+                    }
+
+                    AudioManager.AUDIOFOCUS_LOSS -> {
+                        pause()
+                    }
+
+                    AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
+                        pause()
+                    }
+
+                    AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
+                        pause() // or lowerVolume
+                    }
+                }
+            }
+        }
+    }
+
+    private suspend fun playWithAudioFocus() {
+        if (requestAudioFocus()) {
+            forcePlay()
+        }
+    }
+
+    private suspend fun forcePlay() {
+        performAction {
+            it.play()
+        }
+    }
+
+    // MediaController
+    private suspend fun performAction(action: suspend (MediaController) -> Unit) {
         try {
             val mediaController = ensureMediaController()
             action(mediaController)
