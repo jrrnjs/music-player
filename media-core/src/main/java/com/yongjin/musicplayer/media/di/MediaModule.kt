@@ -2,6 +2,8 @@ package com.yongjin.musicplayer.media.di
 
 import android.content.ComponentName
 import android.content.Context
+import androidx.media3.common.AudioAttributes
+import androidx.media3.common.C
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
 import androidx.media3.session.SessionToken
@@ -21,7 +23,13 @@ object MediaModule {
     fun providesExoPlayer(
         @ApplicationContext context: Context,
     ): ExoPlayer {
+        val audioAttributes = AudioAttributes.Builder()
+            .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
+            .setUsage(C.USAGE_MEDIA)
+            .build()
+
         return ExoPlayer.Builder(context)
+            .setAudioAttributes(audioAttributes, true)
             .build()
     }
 
