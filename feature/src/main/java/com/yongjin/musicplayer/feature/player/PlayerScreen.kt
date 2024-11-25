@@ -1,5 +1,6 @@
 package com.yongjin.musicplayer.feature.player
 
+import android.content.res.Configuration
 import androidx.compose.animation.core.exponentialDecay
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -10,14 +11,19 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -31,7 +37,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.tooling.preview.PreviewScreenSizes
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -69,9 +78,9 @@ fun PlayerScreen(
     )
 }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun PlayerScreen(
+private fun PlayerScreen(
     state: PlayerState,
     volumeState: VolumeState,
     onPlayClick: (Boolean) -> Unit,
@@ -81,31 +90,39 @@ fun PlayerScreen(
     onShuffleClick: (ShuffleState) -> Unit,
     onPositionChanged: (Long) -> Unit,
     onVolumeChanged: (Int) -> Unit,
+    draggableValue: DraggableValue = DraggableValue.COLLAPSED,
 ) {
+    val configuration = LocalConfiguration.current
+
+    val density = LocalDensity.current
+    val navigationBarInset = WindowInsets.Companion.navigationBars.getBottom(density)
+    val statusBarInset = WindowInsets.Companion.statusBars.getTop(density)
+
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
     ) {
         val screenWidth = constraints.maxWidth.toFloat()
 
-        val collapsedHeight = 72.dp.toPx()
+        val collapsedHeight = PlayerDefaults.collapsedHeight.toPx() + navigationBarInset
         val expandedHeight = constraints.maxHeight.toFloat()
-        val heightRange = expandedHeight - collapsedHeight
 
+        val velocityThreshold = 100.dp.toPx()
         val draggableState = remember {
             AnchoredDraggableState(
-                initialValue = State.COLLAPSED,
+                initialValue = draggableValue,
                 anchors = DraggableAnchors {
-                    State.COLLAPSED at collapsedHeight
-                    State.EXPANDED at expandedHeight
+                    DraggableValue.COLLAPSED at collapsedHeight
+                    DraggableValue.EXPANDED at expandedHeight
                 },
                 positionalThreshold = { totalDistance: Float -> totalDistance * 0.5f },
-                velocityThreshold = { 500f },
+                velocityThreshold = { velocityThreshold },
                 snapAnimationSpec = tween(),
                 decayAnimationSpec = exponentialDecay()
             )
         }
 
+        val heightRange = expandedHeight - collapsedHeight
         val heightDelta by remember {
             derivedStateOf { draggableState.offset - collapsedHeight }
         }
@@ -120,42 +137,46 @@ fun PlayerScreen(
                 .navigationBarsPadding()
                 .height(draggableState.offset.toDp())
         ) {
-            val thumbMinPadding = 8.dp.toPx()
-            val thumbMaxVerticalPadding = 72.dp.toPx()
-            val thumbMaxHorizontalPadding = 32.dp.toPx()
-            val thumbMinSize = 56.dp.toPx()
-            val thumbMaxSize = screenWidth - thumbMaxHorizontalPadding * 2
+            // thumbnail
+            val thumbPadding = with(PlayerDefaults) {
+                (expandedPadding - collapsedPadding) * progress + collapsedPadding
+            }
+            val thumbTopPadding = (statusBarInset * progress).toDp()
 
-            val thumbVerticalPadding =
-                (thumbMaxVerticalPadding - thumbMinPadding) * progress + thumbMinPadding
-            val thumbHorizontalPadding =
-                (thumbMaxHorizontalPadding - thumbMinPadding) * progress + thumbMinPadding
-            val thumbSize = thumbMinSize + progress * (thumbMaxSize - thumbMinSize)
+            if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                val thumbMinSize = PlayerDefaults.collapsedHeight.toPx()
+                val thumbSize = ((screenWidth - thumbMinSize) * progress + thumbMinSize).toDp()
+                PlayerThumbnail(
+                    modifier = Modifier
+                        .padding(top = thumbTopPadding)
+                        .size(thumbSize)
+                        .padding(thumbPadding),
+                    song = state.song
+                )
+            } else {
+                PlayerThumbnail(
+                    modifier = Modifier
+                        .padding(top = thumbTopPadding)
+                        .fillMaxHeight()
+                        .aspectRatio(1f)
+                        .padding(thumbPadding),
+                    song = state.song
+                )
+            }
 
-            PlayerThumbnail(
-                modifier = Modifier
-                    .padding(
-                        vertical = thumbVerticalPadding.toDp(),
-                        horizontal = thumbHorizontalPadding.toDp()
-                    )
-                    .size(thumbSize.toDp()),
-                song = state.song
-            )
-
+            // collapsed
             if (progress <= 0.5f) {
-                val collapseProgress = progress / 0.5f
-                val collapsePlayerPadding = 8.dp.toPx()
-                val collapsePlayerStartPadding =
-                    thumbMinSize + thumbMinPadding * 2 + collapsePlayerPadding
-                val collapsePlayerOffset = -(0.4 * heightDelta).roundToInt()
+                val collapsedProgress = progress / 0.5f
+                val collapsedPlayerOffset = -(0.4 * heightDelta).roundToInt()
                 PlayerCollapsed(
                     modifier = Modifier
+                        .fillMaxWidth()
                         .padding(
-                            start = collapsePlayerStartPadding.toDp(),
-                            end = collapsePlayerPadding.toDp()
+                            start = PlayerDefaults.collapsedHeight + PlayerDefaults.collapsedPadding,
+                            end = PlayerDefaults.collapsedPadding
                         )
-                        .offset { IntOffset(0, collapsePlayerOffset) }
-                        .alpha(1 - collapseProgress)
+                        .offset { IntOffset(0, collapsedPlayerOffset) }
+                        .alpha(1 - collapsedProgress)
                         .align(Alignment.Center),
                     state = state,
                     onPlayClick = onPlayClick
@@ -165,7 +186,7 @@ fun PlayerScreen(
                     LinearProgressIndicator(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .alpha(1 - collapseProgress)
+                            .alpha(1 - collapsedProgress)
                             .align(Alignment.BottomCenter),
                         progress = {
                             state.currentPosition / state.song.duration.toFloat()
@@ -174,45 +195,78 @@ fun PlayerScreen(
                 }
             }
 
+            // expanded
             if (progress >= 0.5f) {
-                val expandProgress = (progress - 0.5f) / 0.5f
-                var expandPlayerHeight by remember { mutableStateOf(0) }
+                if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                    val expandedProgress = (progress - 0.5f) / 0.5f
+                    var expandPlayerHeight by remember { mutableStateOf(0) }
 
-                val expandPlayerOffsetRange =
-                    expandedHeight - thumbMaxSize - thumbVerticalPadding * 2 - expandPlayerHeight
-                val expandPlayerOffset = -(expandProgress * expandPlayerOffsetRange).roundToInt()
-                PlayerExpanded(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .offset {
-                            IntOffset(0, expandPlayerOffset)
-                        }
-                        .padding(horizontal = 32.dp)
-                        .align(Alignment.BottomCenter)
-                        .alpha(expandProgress)
-                        .onGloballyPositioned {
-                            expandPlayerHeight = it.size.height
-                        },
-                    state = state,
-                    volumeState = volumeState,
-                    onPlayClick = onPlayClick,
-                    onPrevClick = onPrevClick,
-                    onNextClick = onNextClick,
-                    onRepeatClick = onRepeatClick,
-                    onShuffleClick = onShuffleClick,
-                    onPositionChanged = onPositionChanged,
-                    onVolumeChanged = onVolumeChanged
-                )
+                    val expandPlayerOffsetRange =
+                        expandedHeight - screenWidth - statusBarInset - navigationBarInset - expandPlayerHeight
+                    val expandPlayerOffset =
+                        -(expandedProgress * expandPlayerOffsetRange).roundToInt()
+                    PlayerExpanded(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .offset {
+                                IntOffset(0, expandPlayerOffset)
+                            }
+                            .padding(horizontal = 32.dp)
+                            .align(Alignment.BottomCenter)
+                            .alpha(expandedProgress)
+                            .onGloballyPositioned {
+                                expandPlayerHeight = it.size.height
+                            },
+                        state = state,
+                        volumeState = volumeState,
+                        onPlayClick = onPlayClick,
+                        onPrevClick = onPrevClick,
+                        onNextClick = onNextClick,
+                        onRepeatClick = onRepeatClick,
+                        onShuffleClick = onShuffleClick,
+                        onPositionChanged = onPositionChanged,
+                        onVolumeChanged = onVolumeChanged
+                    )
+                } else {
+                    val expandedProgress = (progress - 0.5f) / 0.5f
+                    val expandPlayerWidth =
+                        (screenWidth - (expandedHeight - navigationBarInset - statusBarInset)).toDp()
+                    PlayerExpanded(
+                        modifier = Modifier
+                            .padding(top = statusBarInset.dp / 2)
+                            .width(expandPlayerWidth)
+                            .padding(end = PlayerDefaults.expandedPadding)
+                            .align(Alignment.CenterEnd)
+                            .alpha(expandedProgress),
+                        state = state,
+                        volumeState = volumeState,
+                        onPlayClick = onPlayClick,
+                        onPrevClick = onPrevClick,
+                        onNextClick = onNextClick,
+                        onRepeatClick = onRepeatClick,
+                        onShuffleClick = onShuffleClick,
+                        onPositionChanged = onPositionChanged,
+                        onVolumeChanged = onVolumeChanged
+                    )
+                }
             }
         }
     }
 }
 
-private enum class State {
+enum class DraggableValue {
     COLLAPSED, EXPANDED
 }
 
-@PreviewLightDark
+object PlayerDefaults {
+
+    val collapsedHeight: Dp = 72.dp
+    val collapsedPadding: Dp = 8.dp
+
+    val expandedPadding: Dp = 48.dp
+}
+
+@PreviewScreenSizes
 @Composable
 private fun PlayerScreenPreview() {
     MusicPlayerTheme {
@@ -227,6 +281,27 @@ private fun PlayerScreenPreview() {
                 onShuffleClick = {},
                 onPositionChanged = {},
                 onVolumeChanged = {}
+            )
+        }
+    }
+}
+
+@PreviewScreenSizes
+@Composable
+private fun PlayerScreenExpandedPreview() {
+    MusicPlayerTheme {
+        Surface {
+            PlayerScreen(
+                state = dummyPlayer,
+                volumeState = VolumeState(3, 15),
+                onPlayClick = {},
+                onPrevClick = {},
+                onNextClick = {},
+                onRepeatClick = {},
+                onShuffleClick = {},
+                onPositionChanged = {},
+                onVolumeChanged = {},
+                draggableValue = DraggableValue.EXPANDED
             )
         }
     }
