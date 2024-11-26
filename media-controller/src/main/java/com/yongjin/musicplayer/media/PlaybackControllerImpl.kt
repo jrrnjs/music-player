@@ -1,7 +1,9 @@
 package com.yongjin.musicplayer.media
 
+import androidx.annotation.OptIn
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -43,9 +45,21 @@ class PlaybackControllerImpl @Inject constructor(
     // PlaybackController
     override val mediaState: StateFlow<MediaState> = _mediaState.asStateFlow()
 
+    init {
+        // init MediaController
+        coroutineScope.launch {
+            try {
+                ensureMediaController()
+            } catch (_: Exception) {
+            }
+        }
+    }
+
+    @OptIn(UnstableApi::class)
     override suspend fun play(mediaItem: MediaItem) {
         performAction {
             it.setMediaItem(mediaItem)
+            it.prepare()
             it.play()
         }
     }
@@ -53,6 +67,7 @@ class PlaybackControllerImpl @Inject constructor(
     override suspend fun play(mediaItems: List<MediaItem>) {
         performAction {
             it.setMediaItems(mediaItems)
+            it.prepare()
             it.play()
         }
     }
@@ -158,17 +173,19 @@ class PlaybackControllerImpl @Inject constructor(
         return mutex.withLock {
             if (mediaController == null) {
                 try {
-                    mediaController = mediaControllerProvider.get().also { controller ->
-                        controller.addListener(this)
-                        val ready = MediaState(
-                            repeatMode = controller.repeatMode,
-                            shuffleModeEnabled = controller.shuffleModeEnabled,
-                            isPlaying = controller.isPlaying,
-                            currentPosition = controller.currentPosition,
-                            currentMediaItem = null
-                        )
-                        _mediaState.emit(ready)
-                    }
+                    mediaController = mediaControllerProvider.get()
+                        .also { controller ->
+                            controller.addListener(this)
+                            _mediaState.update {
+                                it.copy(
+                                    repeatMode = controller.repeatMode,
+                                    shuffleModeEnabled = controller.shuffleModeEnabled,
+                                    isPlaying = controller.isPlaying,
+                                    currentPosition = controller.currentPosition,
+                                    currentMediaItem = null
+                                )
+                            }
+                        }
                 } catch (e: Exception) {
                     throw e
                 }

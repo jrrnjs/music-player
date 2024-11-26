@@ -10,6 +10,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.DefaultMediaNotificationProvider
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
+import com.yongjin.musicplayer.media.datastore.MediaDataStore
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -31,8 +32,11 @@ class PlaybackService : MediaSessionService() {
             .setAudioAttributes(audioAttributes, true)
             .build()
 
+        val mediaDataStore = MediaDataStore(this)
+        val callback = MediaSessionCallback(mediaDataStore)
+
         mediaSession = MediaSession.Builder(this, player)
-            .setCallback(MediaSessionCallback())
+            .setCallback(callback)
             .setSessionActivity(createPendingIntent())
             .build()
 
