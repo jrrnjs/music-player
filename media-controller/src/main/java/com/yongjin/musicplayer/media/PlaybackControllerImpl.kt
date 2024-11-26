@@ -91,6 +91,9 @@ class PlaybackControllerImpl @Inject constructor(
         performAction {
             if (it.hasPreviousMediaItem() && it.currentPosition < 5000) {
                 it.seekToPreviousMediaItem()
+                if (!it.isPlaying) {
+                    it.play()
+                }
             } else {
                 it.seekToDefaultPosition()
             }
@@ -101,6 +104,9 @@ class PlaybackControllerImpl @Inject constructor(
         performAction {
             if (it.hasNextMediaItem()) {
                 it.seekToNextMediaItem()
+                if (!it.isPlaying) {
+                    it.play()
+                }
             }
         }
     }
