@@ -57,7 +57,9 @@ class MediaSessionCallback(
             }
             mediaItems.await()?.let {
                 session.player.setMediaItems(it)
-                session.player.prepare()
+                if (session.player.playbackState == Player.STATE_READY) {
+                    session.player.prepare()
+                }
             }
         }
         session.player.addListener(playerListener)
