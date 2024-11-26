@@ -43,6 +43,9 @@ class PlaybackService : MediaSessionService() {
         setMediaNotificationProvider(DefaultMediaNotificationProvider(this))
     }
 
+    override fun onTaskRemoved(rootIntent: Intent?) {
+    }
+
     override fun onDestroy() {
         mediaSession?.player?.release()
         mediaSession?.release()
