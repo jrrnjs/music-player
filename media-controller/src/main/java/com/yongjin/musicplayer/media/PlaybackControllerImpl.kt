@@ -49,9 +49,9 @@ class PlaybackControllerImpl @Inject constructor(
     init {
         // init MediaController
         coroutineScope.launch {
-            launch {
+            mutex.withLock {
                 try {
-                    ensureMediaController()
+                    initialize()
                 } catch (_: Exception) {
                 }
             }
@@ -168,6 +168,35 @@ class PlaybackControllerImpl @Inject constructor(
     }
 
     // MediaController
+    private suspend fun initialize() {
+        mediaController = withContext(Dispatchers.IO) {
+            mediaControllerProvider.get()
+        }.apply {
+            addListener(this@PlaybackControllerImpl)
+            _mediaState.update {
+                it.copy(
+                    repeatMode = repeatMode,
+                    shuffleModeEnabled = shuffleModeEnabled,
+                    isPlaying = isPlaying,
+                    currentPosition = currentPosition,
+                    currentMediaItem = currentMediaItem
+                )
+            }
+            if (isPlaying) {
+                startTrackingPosition()
+            }
+        }
+    }
+
+    private suspend fun ensureMediaController(): MediaController {
+        return mutex.withLock {
+            if (mediaController == null) {
+                initialize()
+            }
+            mediaController!!
+        }
+    }
+
     private suspend fun performAction(action: suspend (MediaController) -> Unit) {
         try {
             val mediaController = ensureMediaController()
@@ -176,34 +205,6 @@ class PlaybackControllerImpl @Inject constructor(
             mediaController?.removeListener(this)
             mediaController?.release()
             mediaController = null
-        }
-    }
-
-    private suspend fun ensureMediaController(): MediaController {
-        return mutex.withLock {
-            if (mediaController == null) {
-                try {
-                    mediaController = mediaControllerProvider.get()
-                        .also { controller ->
-                            controller.addListener(this)
-                            _mediaState.update {
-                                it.copy(
-                                    repeatMode = controller.repeatMode,
-                                    shuffleModeEnabled = controller.shuffleModeEnabled,
-                                    isPlaying = controller.isPlaying,
-                                    currentPosition = controller.currentPosition,
-                                    currentMediaItem = controller.currentMediaItem
-                                )
-                            }
-                            if (controller.isPlaying) {
-                                startTrackingPosition()
-                            }
-                        }
-                } catch (e: Exception) {
-                    throw e
-                }
-            }
-            mediaController!!
         }
     }
 }
