@@ -24,10 +24,15 @@ import com.yongjin.musicplayer.feature.MusicPlayerRoute
 import com.yongjin.musicplayer.feature.album.AlbumScreen
 import com.yongjin.musicplayer.feature.library.LibraryScreen
 import com.yongjin.musicplayer.feature.player.PlayerScreen
+import com.yongjin.musicplayer.media.PlaybackController
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var playbackController: PlaybackController
 
     @OptIn(ExperimentalPermissionsApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -83,5 +88,10 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        playbackController.release()
     }
 }

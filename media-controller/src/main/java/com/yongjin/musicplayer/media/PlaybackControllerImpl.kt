@@ -5,10 +5,12 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
+import dagger.hilt.android.scopes.ActivityRetainedScoped
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,9 +22,8 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
+@ActivityRetainedScoped
 class PlaybackControllerImpl @Inject constructor(
     private val mediaControllerProvider: MediaControllerProvider,
 ) : PlaybackController, Player.Listener {
@@ -48,9 +49,11 @@ class PlaybackControllerImpl @Inject constructor(
     init {
         // init MediaController
         coroutineScope.launch {
-            try {
-                ensureMediaController()
-            } catch (_: Exception) {
+            launch {
+                try {
+                    ensureMediaController()
+                } catch (_: Exception) {
+                }
             }
         }
     }
@@ -120,6 +123,13 @@ class PlaybackControllerImpl @Inject constructor(
         }
     }
 
+    override fun release() {
+        coroutineScope.cancel()
+        mediaController?.removeListener(this)
+        mediaController?.release()
+        mediaController = null
+    }
+
     // Player.Listener
     override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
         _mediaState.update { it.copy(currentMediaItem = mediaItem) }
@@ -182,8 +192,11 @@ class PlaybackControllerImpl @Inject constructor(
                                     shuffleModeEnabled = controller.shuffleModeEnabled,
                                     isPlaying = controller.isPlaying,
                                     currentPosition = controller.currentPosition,
-                                    currentMediaItem = null
+                                    currentMediaItem = controller.currentMediaItem
                                 )
+                            }
+                            if (controller.isPlaying) {
+                                startTrackingPosition()
                             }
                         }
                 } catch (e: Exception) {

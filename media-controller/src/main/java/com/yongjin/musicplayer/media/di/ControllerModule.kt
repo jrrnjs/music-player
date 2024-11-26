@@ -5,15 +5,13 @@ import com.yongjin.musicplayer.media.PlaybackControllerImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import javax.inject.Singleton
+import dagger.hilt.android.components.ActivityRetainedComponent
 
 @Module
-@InstallIn(SingletonComponent::class)
+@InstallIn(ActivityRetainedComponent::class)
 abstract class ControllerModule {
 
     @Binds
-    @Singleton
     abstract fun bindsPlaybackController(
         controller: PlaybackControllerImpl,
     ): PlaybackController

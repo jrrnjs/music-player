@@ -24,4 +24,6 @@ interface PlaybackController {
     suspend fun changeRepeatMode(repeatMode: Int)
 
     suspend fun seekTo(position: Long)
+
+    fun release()
 }
